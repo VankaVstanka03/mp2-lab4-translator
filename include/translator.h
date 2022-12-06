@@ -57,6 +57,40 @@ public:
 	std::string operators;
 	std::vector<std::string> variables;
 
+	Parser_of_sentence() {};
+
+	void init(std::string sentence) {
+		for (int i = 0; i < sentence.size(); i++) {
+			if (sentence[i] != ' ')
+				all.push_back(sentence[i]);
+		}
+		for (int i = 0; i < sentence.size(); i++) {
+			if (std::find(std::begin(ALPHABET), std::end(ALPHABET), sentence[i]) != std::end(ALPHABET)) {
+				continue;
+			}
+			else if (std::find(std::begin(NUMBERS), std::end(NUMBERS), sentence[i]) != std::end(NUMBERS) || sentence[i] == '.') {
+				continue;
+			}
+			else if (std::find(std::begin(OPERATORS), std::end(OPERATORS), sentence[i]) != std::end(OPERATORS) || sentence[i] == '(' || sentence[i] == ')') {
+				continue;
+			}
+			else if (sentence[i] == ' ') {
+				continue;
+			}
+			else {
+				throw std::exception("You wrote smth wrong");
+			}
+		}
+	};
+
+	void clear() {
+		all.clear();
+		lex.clear();
+		rev_pol.clear();
+		pos_of_variables.clear();
+		variables.clear();
+	};
+
 	Parser_of_sentence(std::string l) {
 		for (int i = 0; i < l.size(); i++) {
 			if (l[i] != ' ')
