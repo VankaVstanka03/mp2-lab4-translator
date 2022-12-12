@@ -4,16 +4,18 @@
 int main() {
 	std::string sentence;
 	Parser_of_sentence sent;
-	std::cout << "Welcome to my broken mini programming language, if you wanna left write 'exit()'"<< std::endl;
+	std::cout << "Welcome to my broken mini calculator, if you wanna left write 'exit()'"<< std::endl;
 	while (true) {
-		std::cout << ">>>";
+		std::cout << ">>> ";
 		std::getline(std::cin, sentence);
 		if (sentence == "exit()") {
 			return 0;
 		}
-		std::cout << ">>>";
+		std::cout << ">>> ";
 		sent.init(sentence);
-		std::cout << sent.result_of_sentence() << std::endl;
+		sent.correctly_input_parenthless();
+		sent.correctly_input_of_sentence();
+		std::cout << sent.check_variables(sent.lex) << std::endl;
 		sent.clear();
 	}
 	return 0;

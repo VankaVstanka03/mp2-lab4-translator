@@ -5,10 +5,11 @@
 #include <exception>
 #include <map>
 #include <vector>
+#include <cmath>
 
-std::map<std::string, double> glob_variables;
+//std::map<std::string, double> glob_variables;
 
-std::map<std::string, size_t> priority{ {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}};
+std::map<std::string, size_t> priority{ {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"sin", 3}, {"cos", 3} , {"ln", 3} };
 
 const std::string ALPHABET = {"QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm_"};
 const std::string NUMBERS = {"1234567890"};
@@ -53,9 +54,8 @@ public:
 	std::string all;
 	std::vector<Lexeme> lex;
 	std::vector<Lexeme> rev_pol;
-	std::vector<size_t> pos_of_variables;
 	std::string operators;
-	std::vector<std::string> variables;
+	std::map<std::string, double> glob_variables;
 
 	Parser_of_sentence() {};
 
@@ -87,8 +87,6 @@ public:
 		all.clear();
 		lex.clear();
 		rev_pol.clear();
-		pos_of_variables.clear();
-		variables.clear();
 	};
 
 	Parser_of_sentence(std::string l) {
@@ -117,12 +115,12 @@ public:
 
 	bool correctly_input_parenthless() {
 		std::stack<char> a;
-		for (int i = 0; i < operators.size(); i++) {
-			if (operators[i] == '(')
+		for (int i = 0; i < all.size(); i++) {
+			if (all[i] == '(')
 				a.push(')');
-			else if (operators[i] == ')' && !a.empty())
+			else if (all[i] == ')' && !a.empty())
 				a.pop();
-			else if (operators[i] == ')' && a.empty())
+			else if (all[i] == ')' && a.empty())
 				throw std::exception("Not right numbers of parenthlesses");
 		}
 		return a.empty();
@@ -135,8 +133,6 @@ public:
 		lex.push_back(Lexeme());
 		for (int i = 0; i < all.size(); i++) {
 			char ths = all[i];
-			//if (ths == ')')
-			//	continue;
 			switch (state) {
 			case States::WAIT_NUMBER_OR_MINUS_OR_LETTER:
 				if (std::isdigit(ths)) {
@@ -201,6 +197,18 @@ public:
 					state = States::WAIT_NUMBER_OR_OPERATOR_OR_LETTER;
 					lex[count].add(ths);
 				}
+				else if (ths == '(') {
+					state = States::WAIT_NUMBER_OR_MINUS_OR_LETTER;
+					lex[count].add('1');
+					count++;
+					lex.push_back(Lexeme());
+					lex[count].add('*');
+					count++;
+					lex.push_back(Lexeme());
+					lex[count].add(ths);
+					count++;
+					lex.push_back(Lexeme());
+				}
 				else {
 					throw std::exception("Wrong sentence 111");
 				}
@@ -229,6 +237,19 @@ public:
 					lex[count].add(ths);
 					count++;
 					//lex.push_back(Lexeme());
+				}
+				else if (ths == '(') {
+					if (lex[count].data == "sin" || lex[count].data == "cos" || lex[count].data == "ln") {
+						state = States::WAIT_NUMBER_OR_MINUS_OR_LETTER;
+						count++;
+						lex.push_back(Lexeme());
+						lex[count].add(ths);
+						count++;
+						lex.push_back(Lexeme());
+					}
+					else {
+						throw std::exception("Wrong sentence 125.1");
+					}
 				}
 				else {
 					throw std::exception("Wrong sentence 125");
@@ -302,7 +323,9 @@ public:
 		return true;
 	};
 
-	void check_variables() {
+	double check_variables(std::vector<Lexeme>& lex) {
+		std::vector<std::string> variables;
+		std::vector<size_t> pos_of_variables;
 		size_t count_sign_of_eq = 0;
 		size_t count_of_vars = 0;
 		size_t pos_of_sign_of_eq;
@@ -328,23 +351,37 @@ public:
 				else if (lex[i].data == "+" || lex[i].data == "-" || lex[i].data == "*" || lex[i].data == "/") {
 					continue;
 				}
+				else if (lex[i].data == "sin" || lex[i].data == "cos" || lex[i].data == "ln") {
+					continue;
+				}
 				else if (lex[i].data == ")" || lex[i].data == "(") {
 					continue;
 				}
 				else if ((ALPHABET + NUMBERS).find(lex[i].data)) {
-					count_of_vars++;
+					if (count_sign_of_eq==0) {
+						count_of_vars++;
+					}
 					variables.push_back(lex[i].data);
 					pos_of_variables.push_back(i);
 				}
 			}
 			
 		}
-		if (count_sign_of_eq == 1 && count_of_vars == 1 && count_of_nums == 1) {
-			if (glob_variables.find(variables[0]) != glob_variables.end()) {
-				glob_variables.insert({variables[0], lex[pos_of_num].ltod()});
+		if (count_sign_of_eq == 1 && count_of_vars == 1 && count_of_nums >= 0) {
+			std::vector<Lexeme> copy;
+			for (int i = pos_of_sign_of_eq + 1; i < lex.size(); i++) {
+				copy.push_back(lex[i]);
+			}
+			check_variables(copy);
+			parse_on_reverse_poland(copy, this->rev_pol);
+			if (glob_variables.find(variables[0]) == glob_variables.end()) {
+				glob_variables.insert({variables[0], calculate_this_horror(this->rev_pol)});
+				return calculate_this_horror(this->rev_pol);
 			}
 			else {
-				glob_variables[variables[0]] = lex[pos_of_num].ltod();
+				glob_variables[variables[0]] = calculate_this_horror(this->rev_pol);
+				return calculate_this_horror(this->rev_pol);
+				//lex[pos_of_num].ltod()
 			}
 		}
 		else if (count_sign_of_eq == 0 && count_of_vars != 0) {
@@ -354,21 +391,28 @@ public:
 				}
 				else {
 					lex[pos_of_variables[i]].data = std::to_string(glob_variables[variables[i]]);
+					//parse_on_reverse_poland(lex, this->rev_pol);
+					//return calculate_this_horror(this->rev_pol);
 				}
 			}
+			parse_on_reverse_poland(lex, this->rev_pol);
+			return calculate_this_horror(this->rev_pol);
+		}
+		else {
+			parse_on_reverse_poland(this->lex, this->rev_pol);
+			return calculate_this_horror(this->rev_pol);
 		}
 	};
 
-	void parse_on_reverse_poland() {
+	friend void parse_on_reverse_poland(std::vector<Lexeme>& lex, std::vector<Lexeme>& rev_pol) {
 		std::stack<Lexeme> tmp;
-		double num;
 		for (int i = 0; i < lex.size(); i++) {
 			try {
 				lex[i].ltod();
 				rev_pol.push_back(lex[i]);
 			}
 			catch(std::exception e){
-				if (lex[i].data == "+" || lex[i].data == "-" || lex[i].data == "*" || lex[i].data == "/") {
+				if (lex[i].data == "+" || lex[i].data == "-" || lex[i].data == "*" || lex[i].data == "/" || lex[i].data == "sin" || lex[i].data == "cos" || lex[i].data == "ln") {
 					if (tmp.empty()) {
 						tmp.push(lex[i]);
 					}
@@ -412,7 +456,7 @@ public:
 		}
 	};
 
-	double calculate_this_horror() {
+	double calculate_this_horror(std::vector<Lexeme>& rev_pol) {
 		std::stack<double> res;
 		double tmp1, tmp2;
 		for (int i = 0; i < rev_pol.size(); i++) {
@@ -465,16 +509,43 @@ public:
 						res.push(tmp1 / tmp2);
 					}
 				}
+				else if (rev_pol[i].data == "sin") {
+					tmp2 = res.top();
+					res.pop();
+					res.push(sin(tmp2));
+				}
+				else if (rev_pol[i].data == "cos") {
+					tmp2 = res.top();
+					res.pop();
+					res.push(cos(tmp2));
+				}
+				else if (rev_pol[i].data == "ln") {
+					tmp2 = res.top();
+					res.pop();
+					if (tmp2 > 0) {
+						res.push(log(tmp2));
+					}
+					else {
+						throw std::exception("Negative argument inside ln");
+					}
+				}
 			}
 		}
 		return res.top();
 	};
 
-	double result_of_sentence() {
-		if (correctly_input_parenthless() && correctly_input_of_sentence()) {
-			check_variables();
-			parse_on_reverse_poland();
-			return calculate_this_horror();
-		}
-	};
+	//double result_of_sentence() {
+	//	bool flag = true;
+	//	if (correctly_input_parenthless() && correctly_input_of_sentence()) {
+	//		check_variables(this->lex, flag);
+	//		if (flag) {
+	//			parse_on_reverse_poland(this->lex, this->rev_pol);
+	//			return calculate_this_horror(this->rev_pol);
+	//		}
+	//		else {
+	//			flag = true;
+	//			return 0.0;
+	//		}
+	//	}
+	//};
 };
