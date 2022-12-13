@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 #include <cmath>
+#include <iomanip>
+#include <sstream>
 
 //std::map<std::string, double> glob_variables;
 
@@ -390,9 +392,15 @@ public:
 					throw std::exception("Undefined variable");
 				}
 				else {
-					lex[pos_of_variables[i]].data = std::to_string(glob_variables[variables[i]]);
+					std::stringstream ss;
+					ss << std::setprecision(16) << glob_variables[variables[i]];
+					lex[pos_of_variables[i]].data = ss.str();
+					//lex[pos_of_variables[i]].data = std::to_string(glob_variables[variables[i]]);
 					//parse_on_reverse_poland(lex, this->rev_pol);
 					//return calculate_this_horror(this->rev_pol);
+					// std::stringstream ss;
+					// ss << setprecision(15) << var;
+					// ss.str()
 				}
 			}
 			parse_on_reverse_poland(lex, this->rev_pol);

@@ -361,38 +361,38 @@ TEST(Parser_of_sentence, can_calculate_hard_sentence_3) {
 	Parser_of_sentence a("ln(sin(1) * cos(1) + ln(60))");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
-	EXPECT_EQ(log(sin(1.) * cos(1.) + log(60.)), a.check_variables(a.lex));
+	EXPECT_DOUBLE_EQ(log(sin(1.) * cos(1.) + log(60.)), a.check_variables(a.lex));
 }
 
 TEST(Parser_of_sentence, can_calculate_hard_sentence_4) {
 	Parser_of_sentence a("cos(60) * cos(60) + sin(60) * sin(60)");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
-	EXPECT_EQ(1., a.check_variables(a.lex));
+	EXPECT_DOUBLE_EQ(1., a.check_variables(a.lex));
 }
 
 TEST(Parser_of_sentence, can_calculate_hard_sentence_5) {
 	Parser_of_sentence a("(ln(cos(60) * cos(60) + sin(60) * sin(60)) + ln(cos(70) * cos(70) + sin(70) * sin(70))) / (ln(cos(10) * cos(10) + sin(10) * sin(10)) + ln(cos(0.5) * cos(0.5) + sin(0.5) * sin(0.5)) + 1)");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
-	EXPECT_EQ(0., a.check_variables(a.lex));
+	EXPECT_DOUBLE_EQ(0., a.check_variables(a.lex));
 }
 
 TEST(Parser_of_sentence, can_calculate_with_variables_1) {
 	Parser_of_sentence a("a = cos(60) * cos(60) + sin(60) * sin(60)");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
-	EXPECT_EQ(1., a.check_variables(a.lex));
-	EXPECT_EQ(1., a.glob_variables["a"]);
+	EXPECT_DOUBLE_EQ(1., a.check_variables(a.lex));
+	EXPECT_DOUBLE_EQ(1., a.glob_variables["a"]);
 	a.clear();
-	a.init("b = ln(sin(1) * cos(1) + ln(60))");
+	a.init("b = ln(sin(1) * cos(1) + ln(20))");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
-	EXPECT_EQ(log(sin(1.) * cos(1.) + log(60.)), a.check_variables(a.lex));
-	EXPECT_EQ(log(sin(1.) * cos(1.) + log(60.)), a.glob_variables["b"]);
+	EXPECT_DOUBLE_EQ(log(sin(1.) * cos(1.) + log(20.)), a.check_variables(a.lex));
+	EXPECT_DOUBLE_EQ(log(sin(1.) * cos(1.) + log(20.)), a.glob_variables["b"]);
 	a.clear();
 	a.init("a + b");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
-	EXPECT_EQ(log(sin(1.) * cos(1.) + log(60.)) + 1., a.check_variables(a.lex));
+	EXPECT_DOUBLE_EQ(log(sin(1.) * cos(1.) + log(20.)) + 1., a.check_variables(a.lex));
 }
