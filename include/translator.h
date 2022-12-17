@@ -115,7 +115,7 @@ public:
 		}
 	};
 
-	bool correctly_input_parenthless() {
+	void correctly_input_parenthless() {
 		std::stack<char> a;
 		for (int i = 0; i < all.size(); i++) {
 			if (all[i] == '(')
@@ -125,7 +125,9 @@ public:
 			else if (all[i] == ')' && a.empty())
 				throw std::exception("Not right numbers of parenthlesses");
 		}
-		return a.empty();
+		if (!a.empty()) {
+			throw std::exception("Not right numbers of parenthlesses");
+		}
 	};
 
 	bool correctly_input_of_sentence() {

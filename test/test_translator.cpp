@@ -11,18 +11,23 @@ TEST(Parser_of_sentence, cant_calculate_wrong_sentence_2) {
 }
 
 TEST(Parser_of_sentence, cant_calculate_wrong_sentence_3) {
+	Parser_of_sentence a("(");
+	ASSERT_ANY_THROW(a.correctly_input_parenthless());
+}
+
+TEST(Parser_of_sentence, cant_calculate_wrong_sentence_4) {
 	Parser_of_sentence a("(1 + 2 + +)");
 	a.correctly_input_parenthless();
 	ASSERT_ANY_THROW(a.correctly_input_of_sentence());
 }
 
-TEST(Parser_of_sentence, cant_calculate_wrong_sentence_4) {
+TEST(Parser_of_sentence, cant_calculate_wrong_sentence_5) {
 	Parser_of_sentence a("3 + ()");
 	a.correctly_input_parenthless();
 	ASSERT_ANY_THROW(a.correctly_input_of_sentence());
 }
 
-TEST(Parser_of_sentence, cant_calculate_wrong_sentence_5) {
+TEST(Parser_of_sentence, cant_calculate_wrong_sentence_6) {
 	Parser_of_sentence a("3 + 5 * 8 - 10 + 8 *");
 	a.correctly_input_parenthless();
 	a.correctly_input_of_sentence();
